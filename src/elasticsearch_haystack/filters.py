@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Union
 
 import numpy as np
-from haystack.preview.errors import FilterError
+from haystack.errors import FilterError
 from pandas import DataFrame
 
 
@@ -122,7 +122,8 @@ def _normalize_ranges(conditions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     ]
     ```
     """
-    range_conditions = [next(iter(c["range"].items())) for c in conditions if "range" in c]
+    range_conditions = [next(iter(c["range"].items()))
+                        for c in conditions if "range" in c]
     if range_conditions:
         conditions = [c for c in conditions if "range" not in c]
         range_conditions_dict: Dict[str, Any] = {}

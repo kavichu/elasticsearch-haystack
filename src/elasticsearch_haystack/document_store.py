@@ -8,11 +8,11 @@ from typing import Any, Dict, List, Mapping, Optional, Union
 import numpy as np
 from elastic_transport import NodeConfig
 from elasticsearch import Elasticsearch, helpers
-from haystack.preview import default_from_dict, default_to_dict
-from haystack.preview.dataclasses import Document
-from haystack.preview.document_stores.decorator import document_store
-from haystack.preview.document_stores.errors import DuplicateDocumentError
-from haystack.preview.document_stores.protocols import DuplicatePolicy
+from haystack import default_from_dict, default_to_dict
+from haystack.dataclasses import Document
+from haystack.document_stores.decorator import document_store
+from haystack.document_stores.errors import DuplicateDocumentError
+from haystack.document_stores.protocols import DuplicatePolicy
 from pandas import DataFrame
 
 from elasticsearch_haystack.filters import _normalize_filters
@@ -142,7 +142,8 @@ class ElasticsearchDocumentStore:
         :param filters: the filters to apply to the document list.
         :return: a list of Documents that match the given filters.
         """
-        query = {"bool": {"filter": _normalize_filters(filters)}} if filters else None
+        query = {"bool": {"filter": _normalize_filters(
+            filters)}} if filters else None
 
         res = self._client.search(
             index=self._index,
@@ -186,7 +187,8 @@ class ElasticsearchDocumentStore:
             # mypy complains that `errors`` could be either `int` or a `list` of `dict`s.
             # Since the type depends on the parameters passed to `helpers.bulk()`` we know
             # for sure that it will be a `list`.
-            ids = ", ".join(e["create"]["_id"] for e in errors)  # type: ignore[union-attr]
+            ids = ", ".join(e["create"]["_id"]
+                            for e in errors)  # type: ignore[union-attr]
             msg = f"IDs '{ids}' already exist in the document store."
             raise DuplicateDocumentError(msg)
 
@@ -253,7 +255,8 @@ class ElasticsearchDocumentStore:
         #
         helpers.bulk(
             client=self._client,
-            actions=({"_op_type": "delete", "_id": id_} for id_ in document_ids),
+            actions=({"_op_type": "delete", "_id": id_}
+                     for id_ in document_ids),
             refresh="wait_for",
             index=self._index,
             raise_on_error=False,
@@ -316,6 +319,7 @@ class ElasticsearchDocumentStore:
         docs = []
         for hit in res["hits"]["hits"]:
             if scale_score:
-                hit["_score"] = float(1 / (1 + np.exp(-np.asarray(hit["_score"] / 8))))
+                hit["_score"] = float(
+                    1 / (1 + np.exp(-np.asarray(hit["_score"] / 8))))
             docs.append(self._deserialize_document(hit))
         return docs

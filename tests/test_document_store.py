@@ -4,10 +4,10 @@
 from unittest.mock import patch
 
 import pytest
-from haystack.preview.dataclasses.document import Document
-from haystack.preview.document_stores.errors import DuplicateDocumentError
-from haystack.preview.document_stores.protocols import DuplicatePolicy
-from haystack.preview.testing.document_store import DocumentStoreBaseTests
+from haystack.dataclasses.document import Document
+from haystack.document_stores.errors import DuplicateDocumentError
+from haystack.document_stores.protocols import DuplicatePolicy
+from haystack.testing.document_store import DocumentStoreBaseTests
 
 from elasticsearch_haystack.document_store import ElasticsearchDocumentStore
 
@@ -30,7 +30,8 @@ class TestDocumentStore(DocumentStoreBaseTests):
 
         store = ElasticsearchDocumentStore(hosts=hosts, index=index)
         yield store
-        store._client.options(ignore_status=[400, 404]).indices.delete(index=index)
+        store._client.options(
+            ignore_status=[400, 404]).indices.delete(index=index)
 
     @patch("elasticsearch_haystack.document_store.Elasticsearch")
     def test_to_dict(self, _mock_elasticsearch_client):
@@ -90,7 +91,8 @@ class TestDocumentStore(DocumentStoreBaseTests):
         doc = Document(text="test doc")
         docstore.write_documents([doc])
         with pytest.raises(DuplicateDocumentError):
-            docstore.write_documents(documents=[doc], policy=DuplicatePolicy.FAIL)
+            docstore.write_documents(
+                documents=[doc], policy=DuplicatePolicy.FAIL)
         assert docstore.filter_documents(filters={"id": doc.id}) == [doc]
 
     def test_delete_not_empty(self, docstore: ElasticsearchDocumentStore):
